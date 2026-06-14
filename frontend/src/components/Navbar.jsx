@@ -92,7 +92,10 @@ export default function Navbar() {
                   className="w-8 h-8 rounded-full border border-green-500/30"
                 />
                 <button
-                  onClick={() => { logout(); navigate('/'); }}
+                  onClick={async () => {
+                    navigate('/', { replace: true });
+                    await logout();
+                  }}
                   className="px-4 py-1.5 text-sm font-medium text-gray-400 hover:text-red-400 border border-gray-700 hover:border-red-500/40 rounded-lg transition-all"
                   aria-label="Log out of EcoSense"
                 >
@@ -156,7 +159,10 @@ export default function Navbar() {
               <div className="pt-2 border-t border-gray-800">
                 {user ? (
                   <button
-                    onClick={() => { logout(); navigate('/'); }}
+                    onClick={async () => {
+                      navigate('/', { replace: true });
+                      await logout();
+                    }}
                     className="w-full px-4 py-2.5 text-left text-sm font-medium text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                   >
                     Logout

@@ -276,9 +276,9 @@ export default function Profile() {
     alert('Settings saved successfully!');
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    navigate('/', { replace: true });
+    await logout();
   };
 
   if (authLoading) {
