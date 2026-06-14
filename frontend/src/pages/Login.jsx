@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../App';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../firebase/config';
 
 // Floating particle for background
 function Particle({ delay, size }) {
@@ -32,23 +34,44 @@ function Particle({ delay, size }) {
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
-    // Simulate auth delay then use demo login
-    setTimeout(() => {
+    try {
+      setLoading(true);
+      setError(null);
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      // Immediately update context
       login({
-        uid: 'demo-user-001',
-        displayName: 'Tanmay Sharma',
-        email: 'tanmay@ecosense.dev',
-        photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Tanmay',
+        uid: user.uid,
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
       });
+      // Force navigate
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      console.error('Google sign-in failed:', err);
+      setError('Sign-in failed. Please try again.');
+    } finally {
       setLoading(false);
-      navigate('/dashboard');
-    }, 1200);
+    }
   };
+
+  const handleDemoLogin = () => {
+    login({
+      uid: 'demo-user-001',
+      displayName: 'Tanmay Sharma',
+      email: 'tanmay@ecosense.dev',
+      photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Tanmay',
+    });
+    navigate('/dashboard', { replace: true });
+  };
+
 
   return (
     <motion.div
@@ -101,6 +124,12 @@ export default function Login() {
             <div className="flex-1 h-px bg-gray-800" />
           </div>
 
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm text-center">
+              {error}
+            </div>
+          )}
+
           {/* Google Sign In Button */}
           <button
             onClick={handleGoogleSignIn}
@@ -138,11 +167,12 @@ export default function Login() {
 
           {/* Demo login option */}
           <button
-            onClick={handleGoogleSignIn}
+            onClick={handleDemoLogin}
             className="w-full mt-3 px-6 py-3 text-sm font-medium text-green-400 border border-green-500/20 rounded-2xl hover:bg-green-500/5 transition-all"
           >
             🚀 Try Demo Account
           </button>
+
 
           {/* Privacy Note */}
           <p className="text-xs text-gray-600 text-center mt-8 leading-relaxed">

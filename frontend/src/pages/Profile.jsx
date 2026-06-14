@@ -59,7 +59,15 @@ export default function Profile() {
 
   const [userBadges, setUserBadges] = useState([]);
   const [userChallenges, setUserChallenges] = useState([]);
-  const [historyData, setHistoryData] = useState([]);
+  const [historyData, setHistoryData] = useState([
+    ['Month', 'Transport', 'Food', 'Energy', 'Shopping'],
+    ['Jan', 45, 35, 40, 25],
+    ['Feb', 42, 30, 38, 20],
+    ['Mar', 38, 32, 35, 22],
+    ['Apr', 35, 28, 33, 18],
+    ['May', 30, 25, 30, 15],
+    ['Jun', 28, 22, 28, 12],
+  ]);
   const [loadingData, setLoadingData] = useState(true);
 
   // Guard routes
@@ -81,6 +89,31 @@ export default function Profile() {
       }
     }
   }, [user]);
+
+  // Always provide demo data if no real history exists
+  const getChartData = (history) => {
+    if (!history || history.length === 0) {
+      // Show demo data so chart never crashes
+      return [
+        ['Month', 'Transport', 'Food', 'Energy', 'Shopping'],
+        ['Jan', 45, 35, 40, 25],
+        ['Feb', 42, 30, 38, 20],
+        ['Mar', 38, 32, 35, 22],
+        ['Apr', 35, 28, 33, 18],
+        ['May', 30, 25, 30, 15],
+        ['Jun', 28, 22, 28, 12],
+      ];
+    }
+    // Build from real history
+    const rows = history.slice(0, 6).map(entry => [
+      new Date(entry.timestamp).toLocaleString('default', {month: 'short'}),
+      entry.breakdown?.transport || 0,
+      entry.breakdown?.food || 0,
+      entry.breakdown?.energy || 0,
+      entry.breakdown?.shopping || 0,
+    ]);
+    return [['Month', 'Transport', 'Food', 'Energy', 'Shopping'], ...rows];
+  };
 
   // Fetch Stats, Badges, History, and Challenges
   const fetchProfileData = async () => {
@@ -120,78 +153,30 @@ export default function Profile() {
           totalSaved,
         });
       } else {
-        // Fallbacks if history is empty
-        setUserStats({
-          totalSubmissions: 12,
-          avgScore: 78,
-          bestScore: 92,
-          totalSaved: totalSaved,
-        });
-      }
-
-      // 3. Process Emission history chart for last 6 months breakdown
-      const months = [];
-      const now = new Date();
-      for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        months.push({
-          name: d.toLocaleString('default', { month: 'short' }),
-          year: d.getFullYear(),
-          monthNum: d.getMonth(),
-          transport: 0,
-          food: 0,
-          energy: 0,
-          shopping: 0,
-          count: 0
-        });
-      }
-
-      // Aggregate history entries into months
-      entries.forEach(entry => {
-        const entryDate = new Date(entry.timestamp);
-        const entryMonth = entryDate.getMonth();
-        const entryYear = entryDate.getFullYear();
-        const matchingMonth = months.find(m => m.monthNum === entryMonth && m.year === entryYear);
-        if (matchingMonth) {
-          const b = entry.breakdown || {};
-          matchingMonth.transport += b.transport || 0.0;
-          matchingMonth.food += b.food || 0.0;
-          matchingMonth.energy += b.energy || 0.0;
-          matchingMonth.shopping += b.shopping || 0.0;
-          matchingMonth.count += 1;
+        // Fallbacks if history is empty and localStorage is also empty
+        const savedHistory = JSON.parse(localStorage.getItem('ecosense_footprint_history') || '[]');
+        const savedLastResult = JSON.parse(localStorage.getItem('ecosense_last_result') || 'null');
+        if (savedHistory.length === 0 && !savedLastResult) {
+          setUserStats({
+            totalSubmissions: 12,
+            avgScore: 78,
+            bestScore: 92,
+            totalSaved: totalSaved,
+          });
         }
-      });
+      }
 
-      // Default mock values if a month has 0 entries to render a gorgeous chart
-      const mockData = {
-        transport: [30.5, 28.0, 35.2, 22.1, 18.5, 25.0],
-        food: [24.0, 22.5, 26.1, 20.4, 19.8, 24.9],
-        energy: [65.2, 58.1, 62.8, 55.0, 50.8, 52.8],
-        shopping: [15.2, 12.8, 18.5, 10.2, 8.5, 10.8]
-      };
-
-      const formattedChart = [
-        ['Month', 'Transport', 'Food', 'Energy', 'Shopping'],
-        ...months.map((m, idx) => {
-          if (m.count === 0) {
-            return [
-              m.name,
-              mockData.transport[idx],
-              mockData.food[idx],
-              mockData.energy[idx],
-              mockData.shopping[idx]
-            ];
-          }
-          return [
-            m.name,
-            roundToDec(m.transport),
-            roundToDec(m.food),
-            roundToDec(m.energy),
-            roundToDec(m.shopping)
-          ];
-        })
-      ];
-      setHistoryData(formattedChart);
+      // 3. Process Emission history chart
+      if (entries.length > 0) {
+        setHistoryData(getChartData(entries));
+      } else {
+        const savedHistory = JSON.parse(localStorage.getItem('ecosense_footprint_history') || '[]');
+        if (savedHistory.length > 0) {
+          setHistoryData(getChartData(savedHistory));
+        } else {
+          setHistoryData(getChartData([]));
+        }
+      }
 
       // 4. Fetch user challenges
       const challengesRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/challenges/user/${user.uid}`);
@@ -212,12 +197,38 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchProfileData();
+    if (!user) return;
+
+    // Load from localStorage as immediate fallback
+    const history = JSON.parse(localStorage.getItem('ecosense_footprint_history') || '[]');
+    const lastResult = JSON.parse(localStorage.getItem('ecosense_last_result') || 'null');
+    
+    if (history.length > 0 || lastResult) {
+      const allEntries = lastResult ? [lastResult, ...history] : history;
+      const uniqueEntries = allEntries.filter((e, i, arr) => 
+        arr.findIndex(x => x.timestamp === e.timestamp) === i
+      );
+      
+      const totalSubmissions = uniqueEntries.length;
+      const avgScore = Math.round(uniqueEntries.reduce((s, e) => s + (e.score || 0), 0) / totalSubmissions);
+      const bestScore = Math.max(...uniqueEntries.map(e => e.score || 0));
+      const totalSaved = Math.max(0, (145.8 - (lastResult?.total_kg || 145.8)));
+
+      setUserStats({
+        totalSubmissions,
+        avgScore,
+        bestScore,
+        totalSaved
+      });
+      setHistoryData(getChartData(uniqueEntries));
     }
+    
+    // Then try API
+    fetchProfileData();
   }, [user]);
 
   const roundToDec = (val) => Math.round(val * 10) / 10;
+
 
   // Active challenges list
   const activeChallenges = userChallenges.filter(uc => uc.status === 'active');

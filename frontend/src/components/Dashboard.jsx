@@ -10,6 +10,20 @@ import EcoNewsFeed from './EcoNewsFeed';
 export default function Dashboard({ user }) {
   const [result, setResult] = useState(null);
 
+  const saveToHistory = (resultData) => {
+    const entry = { ...resultData, timestamp: Date.now() };
+    localStorage.setItem('ecosense_last_result', JSON.stringify(entry));
+    const history = JSON.parse(localStorage.getItem('ecosense_footprint_history') || '[]');
+    history.unshift(entry);
+    // Keep last 30
+    localStorage.setItem('ecosense_footprint_history', JSON.stringify(history.slice(0, 30)));
+  };
+
+  const handleFormSubmit = (res) => {
+    setResult(res);
+    saveToHistory(res);
+  };
+
   const displayName = user?.displayName || 'Eco Warrior';
   const firstName = displayName.split(' ')[0];
 
@@ -75,7 +89,7 @@ export default function Dashboard({ user }) {
             transition={{ duration: 0.3 }}
             className="py-4"
           >
-            <FootprintForm onSubmit={setResult} />
+            <FootprintForm onSubmit={handleFormSubmit} />
           </motion.div>
         ) : (
           // Results View

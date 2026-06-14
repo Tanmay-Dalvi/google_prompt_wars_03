@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import ActionNudge from './components/ActionNudge';
@@ -19,30 +19,43 @@ export function useAuth() {
 }
 
 function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('ecosense_user');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
+      if (firebaseUser) {
+        const u = {
+          uid: firebaseUser.uid,
+          displayName: firebaseUser.displayName,
+          email: firebaseUser.email,
+          photoURL: firebaseUser.photoURL,
+        };
+        setUser(u);
+        localStorage.setItem('ecosense_user', JSON.stringify(u));
+      } else {
+        const currentSaved = localStorage.getItem('ecosense_user');
+        if (currentSaved) {
+          const parsed = JSON.parse(currentSaved);
+          if (parsed.uid !== 'demo-user-001') {
+            setUser(null);
+            localStorage.removeItem('ecosense_user');
+          }
+        } else {
+          setUser(null);
+        }
+      }
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
 
-  const login = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (err) {
-      console.error('Google Sign-In failed, using demo fallback:', err);
-      const demoUser = {
-        uid: 'demo-user-001',
-        displayName: 'Tanmay Sharma',
-        email: 'tanmay@ecosense.dev',
-        photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Tanmay',
-      };
-      setUser(demoUser);
-    }
+  const login = (userData) => {
+    setUser(userData);
+    localStorage.setItem('ecosense_user', JSON.stringify(userData));
   };
 
   const logout = async () => {
@@ -52,6 +65,7 @@ function AuthProvider({ children }) {
       console.error('Sign-out failed, clearing local state:', err);
     }
     setUser(null);
+    localStorage.removeItem('ecosense_user');
   };
 
   return (
@@ -61,13 +75,22 @@ function AuthProvider({ children }) {
   );
 }
 
+
 function AnimatedRoutes() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const isLoginPage = location.pathname === '/login';
 
   useEffect(() => {
     trackEvent('page_view', { page_path: location.pathname });
   }, [location]);
+
+  useEffect(() => {
+    if (user && isLoginPage) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, isLoginPage, navigate]);
 
   return (
     <>
