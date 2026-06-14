@@ -1,0 +1,37 @@
+# Environment files - NEVER commit these
+.env
+.env.local
+.env.production
+.env.development
+frontend/.env
+frontend/.env.local
+backend/.env
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Build outputs
+frontend/dist/
+frontend/.playwright/
+test-results/
+playwright-report/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Firebase service account - NEVER commit
+firebase-adminsdk*.json
+serviceAccountKey*.json
+*-service-account.json
