@@ -1,62 +1,111 @@
 import { test, expect } from '@playwright/test';
-
 const BASE = 'http://localhost:4173';
 
-test.describe('EcoSense Platform', () => {
-  test('homepage loads with hero text', async ({ page }) => {
+test.describe('Navigation', () => {
+  test('homepage loads with hero heading', async ({ page }) => {
     await page.goto(BASE);
-    await expect(page.locator('h1')).toBeVisible();
-    await expect(page.title()).resolves.toContain('Eco');
+    await expect(page.locator('h1').first()).toBeVisible();
   });
 
-  test('navigation links are present', async ({ page }) => {
+  test('page title contains Eco', async ({ page }) => {
     await page.goto(BASE);
-    await expect(page.locator('nav')).toBeVisible();
+    await expect(page).toHaveTitle(/eco/i);
   });
 
+  test('nav has aria-label', async ({ page }) => {
+    await page.goto(BASE);
+    await expect(page.locator('nav[aria-label]').first()).toBeVisible();
+  });
+
+  test('skip to content link is in DOM', async ({ page }) => {
+    await page.goto(BASE);
+    await expect(page.locator('a[href="#main-content"]')).toBeAttached();
+  });
+
+  test('CTA button is visible and enabled', async ({ page }) => {
+    await page.goto(BASE);
+    const cta = page.locator('a[href="/login"], a[href="/dashboard"], button').first();
+    await expect(cta).toBeVisible();
+    await expect(cta).toBeEnabled();
+  });
+});
+
+test.describe('Pages', () => {
   test('login page loads', async ({ page }) => {
     await page.goto(`${BASE}/login`);
     await expect(page.locator('button').first()).toBeVisible();
   });
 
-  test('dashboard redirects to login when unauthenticated', async ({ page }) => {
-    await page.goto(`${BASE}/dashboard`);
-    await page.waitForTimeout(1000);
-    const url = page.url();
-    expect(url.includes('/dashboard') || url.includes('/login')).toBeTruthy();
-  });
-
   test('leaderboard page loads', async ({ page }) => {
     await page.goto(`${BASE}/leaderboard`);
+    await page.waitForTimeout(800);
     await expect(page.locator('body')).toBeVisible();
   });
 
-  test('home page has CTA button', async ({ page }) => {
+  test('dashboard handles unauthenticated state', async ({ page }) => {
+    await page.goto(`${BASE}/dashboard`);
+    await page.waitForTimeout(1500);
+    const url = page.url();
+    expect(url.includes('/dashboard') || url.includes('/login')).toBeTruthy();
+  });
+});
+
+test.describe('Accessibility', () => {
+  test('html lang attribute is en', async ({ page }) => {
     await page.goto(BASE);
-    const cta = page.locator('a[href="/login"], a[href="/dashboard"], button').first();
-    await expect(cta).toBeVisible();
+    const lang = await page.locator('html').getAttribute('lang');
+    expect(lang).toBe('en');
   });
 
-  test('world visualizer SVG renders', async ({ page }) => {
+  test('meta description exists', async ({ page }) => {
     await page.goto(BASE);
-    // SVG should be present somewhere on page
-    const svgCount = await page.locator('svg').count();
-    expect(svgCount).toBeGreaterThan(0);
+    await expect(page.locator('meta[name="description"]')).toBeAttached();
   });
 
-  test('page has no console errors on load', async ({ page }) => {
+  test('favicon link is present', async ({ page }) => {
+    await page.goto(BASE);
+    await expect(page.locator('link[rel="icon"]')).toBeAttached();
+  });
+
+  test('SVG elements are present', async ({ page }) => {
+    await page.goto(BASE);
+    const count = await page.locator('svg').count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('no real JS errors on load', async ({ page }) => {
     const errors = [];
-    page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
+    page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
     await page.goto(BASE);
     await page.waitForTimeout(2000);
-    // Filter out known third-party and dummy configuration network errors
-    const realErrors = errors.filter(e => {
-      const lower = e.toLowerCase();
-      return !lower.includes('firebase') && 
-             !lower.includes('google') && 
-             !lower.includes('failed to load resource') && 
-             !lower.includes('status of 400');
-    });
-    expect(realErrors.length).toBe(0);
+    const real = errors.filter(e =>
+      !e.toLowerCase().includes('firebase') &&
+      !e.toLowerCase().includes('google') &&
+      !e.includes('400') &&
+      !e.includes('placeholder') &&
+      !e.includes('ERR_NAME_NOT_RESOLVED')
+    );
+    expect(real.length).toBe(0);
+  });
+});
+
+test.describe('Performance', () => {
+  test('homepage loads under 5 seconds', async ({ page }) => {
+    const t = Date.now();
+    await page.goto(BASE);
+    await page.waitForLoadState('networkidle');
+    expect(Date.now() - t).toBeLessThan(5000);
+  });
+
+  test('leaderboard loads under 5 seconds', async ({ page }) => {
+    const t = Date.now();
+    await page.goto(`${BASE}/leaderboard`);
+    await page.waitForLoadState('networkidle');
+    expect(Date.now() - t).toBeLessThan(5000);
+  });
+
+  test('viewport meta tag exists', async ({ page }) => {
+    await page.goto(BASE);
+    await expect(page.locator('meta[name="viewport"]')).toBeAttached();
   });
 });

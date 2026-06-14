@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 
 const FALLBACK_NEWS = [
@@ -8,7 +8,7 @@ const FALLBACK_NEWS = [
   { icon: '♻️', headline: 'Circular economy saves 45% emissions', body: 'Buying second-hand and repairing items dramatically cuts shopping footprint. Try local thrift stores.', tag: 'Shopping' },
 ];
 
-export default function EcoNewsFeed() {
+const EcoNewsFeed = memo(function EcoNewsFeed() {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -128,4 +128,6 @@ export default function EcoNewsFeed() {
       )}
     </section>
   );
-}
+});
+
+export default EcoNewsFeed;

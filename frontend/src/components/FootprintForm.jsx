@@ -43,16 +43,16 @@ export default function FootprintForm({ onSubmit }) {
     public_transport_km: 0,
     two_wheeler_km: 0,
     // Step 2: Food (weekly)
-    beef_lamb_meals: 0,
-    chicken_fish_meals: 0,
+    beef_meals: 0,
+    chicken_meals: 0,
     vegetarian_meals: 0,
     food_waste_kg: 0,
     // Step 3: Energy (monthly)
     electricity_kwh: 0,
     lpg_cylinders: 0,
-    ac_hours_day: 0,
+    ac_hours_per_day: 0,
     // Step 4: Shopping (monthly)
-    online_orders_count: 0,
+    online_orders: 0,
     clothing_items: 0,
     electronics_bought: 0,
   });
@@ -74,8 +74,8 @@ export default function FootprintForm({ onSubmit }) {
     ) * 4.3;
 
     const foodVal = (
-      formData.beef_lamb_meals * 6.61 +
-      formData.chicken_fish_meals * 0.69 +
+      formData.beef_meals * 6.61 +
+      formData.chicken_meals * 0.69 +
       formData.vegetarian_meals * 0.16 +
       formData.food_waste_kg * 2.5
     ) * 4.3;
@@ -83,11 +83,11 @@ export default function FootprintForm({ onSubmit }) {
     const energyVal = (
       formData.electricity_kwh * 0.82 +
       formData.lpg_cylinders * 12.7 +
-      formData.ac_hours_day * 30.0 * 0.82 * 1.5
+      formData.ac_hours_per_day * 30.0 * 0.82 * 1.5
     );
 
     const shoppingVal = (
-      formData.online_orders_count * 0.5 +
+      formData.online_orders * 0.5 +
       formData.clothing_items * 10.0 +
       formData.electronics_bought * 300.0
     );
@@ -210,6 +210,7 @@ export default function FootprintForm({ onSubmit }) {
             max={max}
             step={stepVal}
             value={val}
+            aria-required="true"
             onChange={(e) => updateField(field, parseFloat(e.target.value))}
             className="flex-1 accent-green-500 bg-gray-950 h-2 rounded-lg"
           />
@@ -219,6 +220,7 @@ export default function FootprintForm({ onSubmit }) {
             max={max}
             value={val}
             aria-label={`${label} numeric input`}
+            aria-required="true"
             onChange={(e) => {
               const num = parseFloat(e.target.value) || 0;
               updateField(field, Math.min(max, Math.max(min, num)));
@@ -244,10 +246,13 @@ export default function FootprintForm({ onSubmit }) {
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <SliderInput label="Car travel (km/week)" field="car_km" min={0} max={500} unit="km" />
-            <SliderInput label="Flight travel (hours/week)" field="flight_hours" min={0} max={20} unit="hrs" />
-            <SliderInput label="Public transit (km/week)" field="public_transport_km" min={0} max={200} unit="km" />
-            <SliderInput label="Two-wheeler (km/week)" field="two_wheeler_km" min={0} max={300} unit="km" />
+            <fieldset className="space-y-4 border-none p-0 m-0">
+              <legend className="sr-only">Step 1: Transport</legend>
+              <SliderInput label="Car travel (km/week)" field="car_km" min={0} max={500} unit="km" />
+              <SliderInput label="Flight travel (hours/week)" field="flight_hours" min={0} max={20} unit="hrs" />
+              <SliderInput label="Public transit (km/week)" field="public_transport_km" min={0} max={200} unit="km" />
+              <SliderInput label="Two-wheeler (km/week)" field="two_wheeler_km" min={0} max={300} unit="km" />
+            </fieldset>
           </motion.div>
         );
 
@@ -263,10 +268,13 @@ export default function FootprintForm({ onSubmit }) {
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <SliderInput label="Beef & lamb meals/week" field="beef_lamb_meals" min={0} max={21} unit="meals" />
-            <SliderInput label="Chicken & fish meals/week" field="chicken_fish_meals" min={0} max={21} unit="meals" />
-            <SliderInput label="Vegetarian/Vegan meals/week" field="vegetarian_meals" min={0} max={21} unit="meals" />
-            <SliderInput label="Food waste generated/week" field="food_waste_kg" min={0} max={10} unit="kg" stepVal={0.1} />
+            <fieldset className="space-y-4 border-none p-0 m-0">
+              <legend className="sr-only">Step 2: Food</legend>
+              <SliderInput label="Beef & lamb meals/week" field="beef_meals" min={0} max={21} unit="meals" />
+              <SliderInput label="Chicken & fish meals/week" field="chicken_meals" min={0} max={21} unit="meals" />
+              <SliderInput label="Vegetarian/Vegan meals/week" field="vegetarian_meals" min={0} max={21} unit="meals" />
+              <SliderInput label="Food waste generated/week" field="food_waste_kg" min={0} max={10} unit="kg" stepVal={0.1} />
+            </fieldset>
           </motion.div>
         );
 
@@ -282,9 +290,12 @@ export default function FootprintForm({ onSubmit }) {
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <SliderInput label="Electricity usage/month" field="electricity_kwh" min={0} max={500} unit="kWh" />
-            <SliderInput label="LPG cylinder refills/month" field="lpg_cylinders" min={0} max={5} unit="cylinders" />
-            <SliderInput label="Air Conditioner use/day" field="ac_hours_day" min={0} max={24} unit="hrs/day" stepVal={0.5} />
+            <fieldset className="space-y-4 border-none p-0 m-0">
+              <legend className="sr-only">Step 3: Energy</legend>
+              <SliderInput label="Electricity usage/month" field="electricity_kwh" min={0} max={500} unit="kWh" />
+              <SliderInput label="LPG cylinder refills/month" field="lpg_cylinders" min={0} max={5} unit="cylinders" />
+              <SliderInput label="Air Conditioner use/day" field="ac_hours_per_day" min={0} max={24} unit="hrs/day" stepVal={0.5} />
+            </fieldset>
           </motion.div>
         );
 
@@ -300,9 +311,12 @@ export default function FootprintForm({ onSubmit }) {
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <SliderInput label="Online delivery orders/month" field="online_orders_count" min={0} max={30} unit="orders" />
-            <SliderInput label="New clothing purchases/month" field="clothing_items" min={0} max={20} unit="garments" />
-            <SliderInput label="Electronics bought/month" field="electronics_bought" min={0} max={5} unit="items" />
+            <fieldset className="space-y-4 border-none p-0 m-0">
+              <legend className="sr-only">Step 4: Shopping</legend>
+              <SliderInput label="Online delivery orders/month" field="online_orders" min={0} max={30} unit="orders" />
+              <SliderInput label="New clothing purchases/month" field="clothing_items" min={0} max={20} unit="garments" />
+              <SliderInput label="Electronics bought/month" field="electronics_bought" min={0} max={5} unit="items" />
+            </fieldset>
           </motion.div>
         );
 
@@ -359,7 +373,7 @@ export default function FootprintForm({ onSubmit }) {
 
       {/* Offline Fallback Alert */}
       {apiError && (
-        <div className="mb-4 p-3 bg-amber-500/5 border border-amber-500/20 text-amber-400 rounded-xl text-xxs flex items-center gap-2">
+        <div role="alert" aria-live="assertive" className="mb-4 p-3 bg-amber-500/5 border border-amber-500/20 text-amber-400 rounded-xl text-xxs flex items-center gap-2">
           <span>⚠️</span>
           <span>Offline mode active: results estimated locally using standard formulas.</span>
         </div>

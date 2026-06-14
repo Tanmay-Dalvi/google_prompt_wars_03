@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 
 const DEMO_USERS = [
@@ -20,7 +20,7 @@ const RANK_STYLES = [
   { badge: '🥉', bg: 'bg-amber-700/10', border: 'border-amber-700/30', text: 'text-amber-500' },
 ];
 
-export default function Leaderboard({ users, currentUser }) {
+const Leaderboard = memo(function Leaderboard({ users, currentUser }) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const displayUsers = useMemo(() => {
@@ -69,6 +69,7 @@ export default function Leaderboard({ users, currentUser }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search users..."
+            aria-label="Search leaderboard by name"
             className="w-full pl-10 pr-4 py-3 bg-gray-900/80 border border-green-500/20 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/30 transition-all"
           />
         </div>
@@ -175,4 +176,6 @@ export default function Leaderboard({ users, currentUser }) {
       </div>
     </div>
   );
-}
+});
+
+export default Leaderboard;

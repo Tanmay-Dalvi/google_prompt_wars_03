@@ -1,15 +1,26 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import ActionNudge from './components/ActionNudge';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import DashboardPage from './pages/DashboardPage';
-import LeaderboardPage from './pages/LeaderboardPage';
-import Profile from './pages/Profile';
 import { auth, googleProvider, trackEvent } from './firebase/config';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'));
+const Profile = lazy(() => import('./pages/Profile'));
+
+const PageLoader = () => (
+  <div className="min-h-screen bg-[#0a0f0a] flex items-center justify-center">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"/>
+      <p className="text-green-400 font-semibold tracking-wide">Loading EcoSense...</p>
+    </div>
+  </div>
+);
+
 
 // Auth Context
 export const AuthContext = createContext(null);
@@ -95,15 +106,17 @@ function AnimatedRoutes() {
   return (
     <>
       {!isLoginPage && <Navbar />}
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/leaderboard" element={<LeaderboardPage />} />
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
-      </AnimatePresence>
+      <Suspense fallback={<PageLoader />}>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/profile" element={<Profile />} />
+          </Routes>
+        </AnimatePresence>
+      </Suspense>
       {!isLoginPage && <ActionNudge />}
     </>
   );

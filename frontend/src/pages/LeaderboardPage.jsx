@@ -135,6 +135,7 @@ export default function LeaderboardPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      aria-label="Carbon footprint community leaderboard"
       className="min-h-screen pt-24 pb-24 px-4 sm:px-6 lg:px-8 bg-[#0a0f0a]"
       role="main"
       id="main-content"
@@ -205,6 +206,7 @@ export default function LeaderboardPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search user by name..."
+              aria-label="Search leaderboard by name"
               className="w-full pl-10 pr-4 py-2.5 bg-gray-900/80 border border-green-500/20 rounded-xl text-xs sm:text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-green-500/50"
             />
           </div>
@@ -389,7 +391,7 @@ export default function LeaderboardPage() {
                       className="w-7 h-7 rounded-full border border-gray-800 bg-gray-950 object-cover"
                     />
                     <span className="font-bold text-green-400">
-                      {ownRank.display_name} <span className="text-xxs text-gray-500 font-semibold">(Your Current Position)</span>
+                      {ownRank.display_name} <span role="status" aria-live="polite" className="text-xxs text-gray-500 font-semibold">(Your Current Position)</span>
                     </span>
                   </div>
                   

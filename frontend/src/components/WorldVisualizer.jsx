@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { memo } from 'react';
 
 // Cloud Component
 function Cloud({ x, y, isPolluted, delay }) {
@@ -85,7 +86,7 @@ function Animal({ x, y, emoji, visible, delay }) {
   );
 }
 
-export default function WorldVisualizer({ score = 50 }) {
+const WorldVisualizer = memo(function WorldVisualizer({ score = 50 }) {
   // Determine planet status based on score
   const isLow = score <= 30; // 0-30: bad
   const isMed = score > 30 && score <= 60; // 31-60: medium
@@ -153,7 +154,13 @@ export default function WorldVisualizer({ score = 50 }) {
 
       {/* SVG Canvas */}
       <div className="relative w-full aspect-square max-w-[280px]">
-        <svg viewBox="0 0 300 300" className="w-full h-full overflow-hidden rounded-2xl">
+        <svg
+          viewBox="0 0 300 300"
+          className="w-full h-full overflow-hidden rounded-2xl"
+          role="img"
+          aria-label={`EcoSense world visualizer. Current eco score: ${score} out of 100`}
+        >
+          <title>Carbon Footprint World Visualizer - Score {score}/100</title>
           <defs>
             <style>
               @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap');
@@ -305,4 +312,6 @@ export default function WorldVisualizer({ score = 50 }) {
       </div>
     </motion.div>
   );
-}
+});
+
+export default WorldVisualizer;

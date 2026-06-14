@@ -29,6 +29,7 @@ export default function Navbar() {
 
   return (
     <nav
+      aria-label="Main navigation"
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'bg-gray-900/90 backdrop-blur-xl shadow-lg shadow-green-500/5'
@@ -59,6 +60,7 @@ export default function Navbar() {
                 <Link
                   key={link.path}
                   to={link.path}
+                  aria-current={isActive ? 'page' : undefined}
                   className="relative px-4 py-2 text-sm font-medium transition-colors"
                 >
                   <span
@@ -146,6 +148,7 @@ export default function Navbar() {
                   <Link
                     key={link.path}
                     to={link.path}
+                    aria-current={isActive ? 'page' : undefined}
                     className={`block px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                       isActive
                         ? 'text-green-400 bg-green-500/10'

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Chart } from 'react-google-charts';
 import FootprintForm from './FootprintForm';
@@ -7,7 +7,7 @@ import WorldVisualizer from './WorldVisualizer';
 import ActionNudge from './ActionNudge';
 import EcoNewsFeed from './EcoNewsFeed';
 
-export default function Dashboard({ user }) {
+const Dashboard = memo(function Dashboard({ user }) {
   const [result, setResult] = useState(null);
 
   const saveToHistory = (resultData) => {
@@ -26,6 +26,28 @@ export default function Dashboard({ user }) {
 
   const displayName = user?.displayName || 'Eco Warrior';
   const firstName = displayName.split(' ')[0];
+
+  const pieData = useMemo(() => {
+    if (!result) return [];
+    return [
+      ['Category', 'kg CO2'],
+      ['Transport', result.breakdown.transport || 0],
+      ['Food', result.breakdown.food || 0],
+      ['Energy', result.breakdown.energy || 0],
+      ['Shopping', result.breakdown.shopping || 0],
+    ];
+  }, [result]);
+
+  const barData = useMemo(() => {
+    if (!result) return [];
+    return [
+      ['Category', 'You', 'India Avg', 'Global Avg'],
+      ['Transport', result.breakdown.transport, 45, 80],
+      ['Food', result.breakdown.food, 35, 60],
+      ['Energy', result.breakdown.energy, 40, 70],
+      ['Shopping', result.breakdown.shopping, 25.8, 50],
+    ];
+  }, [result]);
 
   const handleReset = () => {
     setResult(null);
@@ -49,7 +71,7 @@ export default function Dashboard({ user }) {
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div role="main" id="main-content" className="space-y-6 max-w-6xl mx-auto">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -184,18 +206,12 @@ export default function Dashboard({ user }) {
 
               {/* Google Charts: Pie & Bar */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-900/80 border border-green-500/20 rounded-3xl p-5 shadow-[0_0_15px_rgba(34,197,94,0.03)]">
+                <div aria-label="Emissions breakdown pie chart" className="bg-gray-900/80 border border-green-500/20 rounded-3xl p-5 shadow-[0_0_15px_rgba(34,197,94,0.03)]">
                   <Chart
                     chartType="PieChart"
                     width="100%"
                     height="300px"
-                    data={[
-                      ['Category', 'kg CO2'],
-                      ['Transport', result.breakdown.transport],
-                      ['Food', result.breakdown.food],
-                      ['Energy', result.breakdown.energy],
-                      ['Shopping', result.breakdown.shopping],
-                    ]}
+                    data={pieData}
                     options={{
                       title: 'Your Emissions Breakdown',
                       backgroundColor: 'transparent',
@@ -212,18 +228,12 @@ export default function Dashboard({ user }) {
                     }}
                   />
                 </div>
-                <div className="bg-gray-900/80 border border-green-500/20 rounded-3xl p-5 shadow-[0_0_15px_rgba(34,197,94,0.03)]">
+                <div aria-label="Emissions comparison bar chart" className="bg-gray-900/80 border border-green-500/20 rounded-3xl p-5 shadow-[0_0_15px_rgba(34,197,94,0.03)]">
                   <Chart
                     chartType="BarChart"
                     width="100%"
                     height="300px"
-                    data={[
-                      ['Category', 'You', 'India Avg', 'Global Avg'],
-                      ['Transport', result.breakdown.transport, 45, 80],
-                      ['Food', result.breakdown.food, 35, 60],
-                      ['Energy', result.breakdown.energy, 40, 70],
-                      ['Shopping', result.breakdown.shopping, 25.8, 50],
-                    ]}
+                    data={barData}
                     options={{
                       title: 'You vs World',
                       backgroundColor: 'transparent',
@@ -246,7 +256,7 @@ export default function Dashboard({ user }) {
                 <p className="text-xs text-gray-500 mt-1 mb-4">
                   Find parks, cycling paths, and eco-friendly spots
                 </p>
-                <div className="w-full h-[300px] overflow-hidden rounded-xl border border-gray-850 bg-gray-950">
+                <div aria-label="Nearby eco-friendly locations map" className="w-full h-[300px] overflow-hidden rounded-xl border border-gray-850 bg-gray-950">
                   <iframe
                     title="Green Spaces Maps search"
                     width="100%"
@@ -307,4 +317,6 @@ export default function Dashboard({ user }) {
       </AnimatePresence>
     </div>
   );
-}
+});
+
+export default Dashboard;

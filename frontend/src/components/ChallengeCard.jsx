@@ -29,8 +29,16 @@ export default function ChallengeCard({ challenge, onJoin, onComplete, userChall
   const categoryIcon = CATEGORY_ICONS[challenge.category] || '🌱';
   const difficultyColor = DIFFICULTY_COLORS[challenge.difficulty?.toLowerCase()] || DIFFICULTY_COLORS.medium;
 
+  const joinedDate = userChallenge?.joined_at ? new Date(userChallenge.joined_at) : new Date();
+  const elapsedMs = Math.max(0, new Date() - joinedDate);
+  const elapsedDays = Math.floor(elapsedMs / (1000 * 60 * 60 * 24));
+  const daysRemaining = Math.max(0, challenge.duration_days - elapsedDays);
+  const progress = isCompleted ? 100 : isActive ? Math.min(95, Math.max(5, Math.round(((challenge.duration_days - daysRemaining) / challenge.duration_days) * 100))) : 0;
+
   return (
     <motion.div
+      role="article"
+      aria-label={`${challenge.title} challenge, ${challenge.difficulty} difficulty`}
       whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(34, 197, 94, 0.15)' }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       className={`relative bg-gray-900/90 backdrop-blur-md border rounded-2xl p-5 transition-all ${
@@ -79,30 +87,22 @@ export default function ChallengeCard({ challenge, onJoin, onComplete, userChall
           </div>
 
           {/* Progress Section */}
-          {isActive && (() => {
-            const joinedDate = userChallenge?.joined_at ? new Date(userChallenge.joined_at) : new Date();
-            const elapsedMs = Math.max(0, new Date() - joinedDate);
-            const elapsedDays = Math.floor(elapsedMs / (1000 * 60 * 60 * 24));
-            const daysRemaining = Math.max(0, challenge.duration_days - elapsedDays);
-            const pct = Math.min(95, Math.max(5, Math.round(((challenge.duration_days - daysRemaining) / challenge.duration_days) * 100)));
-            
-            return (
-              <div className="mt-4 pt-3 border-t border-gray-850">
-                <div className="flex items-center justify-between text-xxs mb-1.5 font-bold uppercase tracking-wider text-yellow-500">
-                  <span>In Progress ({daysRemaining} days left)</span>
-                  <span>{pct}%</span>
-                </div>
-                <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${pct}%` }}
-                    transition={{ duration: 0.8 }}
-                    className="h-full bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full"
-                  />
-                </div>
+          {isActive && (
+            <div className="mt-4 pt-3 border-t border-gray-850">
+              <div className="flex items-center justify-between text-xxs mb-1.5 font-bold uppercase tracking-wider text-yellow-500">
+                <span>In Progress ({daysRemaining} days left)</span>
+                <span>{progress}%</span>
               </div>
-            );
-          })()}
+              <div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={progress} className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.8 }}
+                  className="h-full bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full"
+                />
+              </div>
+            </div>
+          )}
 
           {isCompleted && (
             <div className="mt-4 pt-3 border-t border-gray-850">
@@ -110,7 +110,7 @@ export default function ChallengeCard({ challenge, onJoin, onComplete, userChall
                 <span>Completed</span>
                 <span>100%</span>
               </div>
-              <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+              <div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={100} className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" />
               </div>
             </div>
@@ -121,6 +121,7 @@ export default function ChallengeCard({ challenge, onJoin, onComplete, userChall
             {!isJoined && (
               <button
                 onClick={() => onJoin && onJoin(challenge.id)}
+                aria-label={`Join ${challenge.title}`}
                 className="px-4 py-2 text-xxs sm:text-xs font-bold text-eco-dark bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl hover:shadow-lg hover:shadow-green-500/20 transition-all active:scale-95"
               >
                 Join Challenge
@@ -130,6 +131,7 @@ export default function ChallengeCard({ challenge, onJoin, onComplete, userChall
             {isActive && (
               <button
                 onClick={() => onComplete && onComplete(challenge.id)}
+                aria-label={`Mark ${challenge.title} as complete`}
                 className="px-4 py-2 text-xxs sm:text-xs font-bold text-eco-dark bg-gradient-to-r from-yellow-500 to-amber-500 rounded-xl hover:shadow-lg hover:shadow-yellow-500/20 transition-all active:scale-95"
               >
                 Complete Challenge

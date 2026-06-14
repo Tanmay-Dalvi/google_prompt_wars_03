@@ -343,7 +343,7 @@ export default function Profile() {
         </motion.div>
 
         {/* 2. Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div role="region" aria-label="User statistics" className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: 'Total Submissions', value: userStats.totalSubmissions, icon: <Icons.Submissions />, color: 'bg-blue-500/10 border-blue-500/20' },
             { label: 'Avg Score', value: userStats.avgScore, icon: <Icons.AvgScore />, color: 'bg-yellow-500/10 border-yellow-500/20' },
@@ -373,6 +373,8 @@ export default function Profile() {
           
           {/* Emission History Chart */}
           <motion.div
+            role="region"
+            aria-label="Emissions history chart"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="lg:col-span-2 bg-gray-900/80 border border-green-500/20 rounded-3xl p-6 shadow-[0_0_15px_rgba(34,197,94,0.05)]"
@@ -418,6 +420,8 @@ export default function Profile() {
 
           {/* Badges Showcase */}
           <motion.div
+            role="region"
+            aria-label="Achievement badges"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="bg-gray-900/80 border border-green-500/20 rounded-3xl p-6 shadow-[0_0_15px_rgba(34,197,94,0.05)] flex flex-col justify-between"
@@ -522,6 +526,9 @@ export default function Profile() {
                     max="200"
                     step="5"
                     value={settings.targetCO2}
+                    aria-valuemin="0"
+                    aria-valuemax="200"
+                    aria-valuenow={settings.targetCO2}
                     onChange={(e) => setSettings({ ...settings, targetCO2: parseInt(e.target.value) })}
                     className="flex-1 accent-green-500 bg-gray-950 rounded-lg h-2"
                   />
