@@ -47,7 +47,7 @@ export default function LeaderboardPage() {
       setApiLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/leaderboard?period=${timePeriod}&limit=50`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/leaderboard?period=${timePeriod}&limit=50`);
         if (!response.ok) {
           throw new Error('Failed to fetch leaderboard data');
         }
@@ -82,7 +82,7 @@ export default function LeaderboardPage() {
 
     const fetchOwnRank = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/leaderboard/rank/${user.uid}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/leaderboard/rank/${user.uid}`);
         if (response.ok) {
           const rankData = await response.json();
           setOwnRank(rankData);

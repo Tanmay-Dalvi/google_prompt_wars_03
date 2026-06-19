@@ -33,7 +33,7 @@ export default function ActionNudge({ highestCategory }) {
 
     const fetchNudge = async () => {
       try {
-        const url = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/insights/nudge/${highestCategory}`;
+        const url = `${import.meta.env.VITE_API_URL || ''}/insights/nudge/${highestCategory}`;
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error('Nudge API failed');

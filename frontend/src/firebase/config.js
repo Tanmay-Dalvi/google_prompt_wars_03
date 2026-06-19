@@ -1,3 +1,8 @@
+/**
+ * Firebase configuration and initialization for EcoSense.
+ * Initializes Firebase Auth, Firestore, and Analytics.
+ * @module firebase/config
+ */
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';

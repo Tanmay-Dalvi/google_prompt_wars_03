@@ -17,7 +17,7 @@ const EcoNewsFeed = memo(function EcoNewsFeed() {
 
     const fetchNews = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/insights/news`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/insights/news`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

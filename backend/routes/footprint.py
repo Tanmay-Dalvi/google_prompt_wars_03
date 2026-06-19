@@ -15,10 +15,30 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Footprint"])
 
 
+def _sanitize_entry(entry: FootprintEntry) -> FootprintEntry:
+    """Clamp all numeric fields in FootprintEntry to valid ranges to prevent abuse."""
+    entry.car_km = min(max(entry.car_km, 0.0), 10000.0)
+    entry.flight_hours = min(max(entry.flight_hours, 0.0), 500.0)
+    entry.public_transport_km = min(max(entry.public_transport_km, 0.0), 5000.0)
+    entry.two_wheeler_km = min(max(entry.two_wheeler_km, 0.0), 5000.0)
+    entry.beef_meals = min(max(entry.beef_meals, 0.0), 21.0)
+    entry.chicken_meals = min(max(entry.chicken_meals, 0.0), 21.0)
+    entry.vegetarian_meals = min(max(entry.vegetarian_meals, 0.0), 21.0)
+    entry.food_waste_kg = min(max(entry.food_waste_kg, 0.0), 100.0)
+    entry.electricity_kwh = min(max(entry.electricity_kwh, 0.0), 10000.0)
+    entry.lpg_cylinders = min(max(entry.lpg_cylinders, 0.0), 20.0)
+    entry.ac_hours_per_day = min(max(entry.ac_hours_per_day, 0.0), 24.0)
+    entry.online_orders = min(max(entry.online_orders, 0.0), 500.0)
+    entry.clothing_items = min(max(entry.clothing_items, 0.0), 100.0)
+    entry.electronics_bought = min(max(entry.electronics_bought, 0.0), 50.0)
+    return entry
+
+
 @router.post("/footprint/calculate", response_model=FootprintResponse)
 @router.post("/api/footprint/calculate", response_model=FootprintResponse)
 async def calculate_footprint(entry: FootprintEntry) -> FootprintResponse:
     """Calculate emissions breakdown, comparison and score from user inputs."""
+    entry = _sanitize_entry(entry)
     try:
         return CarbonCalculator.calculate_total(entry)
     except ValueError as exc:
@@ -32,6 +52,7 @@ async def calculate_footprint(entry: FootprintEntry) -> FootprintResponse:
 @router.post("/api/footprint/save", status_code=status.HTTP_201_CREATED)
 async def save_footprint(entry: FootprintEntry) -> dict:
     """Calculate and persist a footprint entry in Firestore."""
+    entry = _sanitize_entry(entry)
     try:
         result = CarbonCalculator.calculate_total(entry)
         timestamp = entry.timestamp or datetime.utcnow()

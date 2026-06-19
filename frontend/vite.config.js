@@ -13,8 +13,8 @@ export default defineConfig({
             if (id.includes('framer-motion')) return 'animation-vendor';
             if (id.includes('react-google-charts') || id.includes('google-charts')) return 'charts-vendor';
             if (id.includes('react-icons')) return 'icons-vendor';
-            if (id.includes('react-router-dom') || id.includes('react-router')) return 'router-vendor';
-            if (id.includes('react-dom') || id.includes('react/')) return 'react-vendor';
+            if (id.includes('react-router')) return 'router-vendor';
+            if (id.includes('react-dom') || id.includes('/react/')) return 'react-vendor';
           }
         }
       }
@@ -22,6 +22,12 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     target: 'esnext',
     minify: 'esbuild',
+    sourcemap: false,
+    cssMinify: true,
+  },
+  esbuild: {
+    drop: ['console', 'debugger'],
+    legalComments: 'none',
   },
   server: {
     port: 5173,

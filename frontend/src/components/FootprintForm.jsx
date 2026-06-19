@@ -126,7 +126,7 @@ export default function FootprintForm({ onSubmit }) {
 
     try {
       // 1. Calculate and Save via Backend
-      const calcUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/footprint/calculate`;
+      const calcUrl = `${import.meta.env.VITE_API_URL || ''}/footprint/calculate`;
       const response = await fetch(calcUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -141,7 +141,7 @@ export default function FootprintForm({ onSubmit }) {
       
       // Attempt to save to firestore database asynchronously
       try {
-        const saveUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/footprint/save`;
+        const saveUrl = `${import.meta.env.VITE_API_URL || ''}/footprint/save`;
         await fetch(saveUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

@@ -45,7 +45,7 @@ export default function InsightCard({ footprintData, userId }) {
     };
 
     try {
-      const url = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/insights/generate`;
+      const url = `${import.meta.env.VITE_API_URL || ''}/insights/generate`;
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

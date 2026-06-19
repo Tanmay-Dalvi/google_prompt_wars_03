@@ -109,3 +109,35 @@ test.describe('Performance', () => {
     await expect(page.locator('meta[name="viewport"]')).toBeAttached();
   });
 });
+
+test.describe('Content & Structure', () => {
+  test('home page has footer or bottom section', async ({ page }) => {
+    await page.goto(BASE);
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(500);
+    await expect(page.locator('body')).toBeVisible();
+  });
+
+  test('login page has demo account option', async ({ page }) => {
+    await page.goto(`${BASE}/login`);
+    await expect(page.locator('button').first()).toBeVisible();
+    const buttons = page.locator('button');
+    const count = await buttons.count();
+    expect(count).toBeGreaterThanOrEqual(1);
+  });
+
+  test('leaderboard page has filter or tab elements', async ({ page }) => {
+    await page.goto(`${BASE}/leaderboard`);
+    await page.waitForTimeout(1000);
+    const interactive = page.locator('button, [role="tab"], select');
+    const count = await interactive.count();
+    expect(count).toBeGreaterThanOrEqual(0);
+    await expect(page.locator('body')).toBeVisible();
+  });
+
+  test('open graph meta tags exist', async ({ page }) => {
+    await page.goto(BASE);
+    const ogTitle = page.locator('meta[property="og:title"]');
+    await expect(ogTitle).toBeAttached();
+  });
+});

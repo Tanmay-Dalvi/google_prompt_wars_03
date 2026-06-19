@@ -120,7 +120,7 @@ export default function Profile() {
     if (!user) return;
     try {
       // 1. Fetch rank & badges
-      const rankRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/leaderboard/rank/${user.uid}`);
+      const rankRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/leaderboard/rank/${user.uid}`);
       let fetchedBadges = [];
       let totalSaved = 0.0;
       if (rankRes.ok) {
@@ -135,7 +135,7 @@ export default function Profile() {
       setUserBadges(fetchedBadges);
 
       // 2. Fetch history for stats and chart
-      const historyRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/footprint/history/${user.uid}`);
+      const historyRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/footprint/history/${user.uid}`);
       let entries = [];
       if (historyRes.ok) {
         const history = await historyRes.json();
@@ -179,7 +179,7 @@ export default function Profile() {
       }
 
       // 4. Fetch user challenges
-      const challengesRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/challenges/user/${user.uid}`);
+      const challengesRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/challenges/user/${user.uid}`);
       if (challengesRes.ok) {
         const userCh = await challengesRes.json();
         setUserChallenges(userCh);
@@ -235,7 +235,7 @@ export default function Profile() {
 
   const handleJoinChallenge = async (challengeId) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/challenges/join`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/challenges/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.uid, challenge_id: challengeId })
@@ -250,7 +250,7 @@ export default function Profile() {
 
   const handleCompleteChallenge = async (challengeId) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/challenges/complete`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/challenges/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.uid, challenge_id: challengeId })

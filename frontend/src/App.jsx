@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import ActionNudge from './components/ActionNudge';
 import { auth, googleProvider, trackEvent } from './firebase/config';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
@@ -125,11 +126,13 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-eco-dark font-sans text-gray-100">
-          <AnimatedRoutes />
-        </div>
-      </Router>
+      <ErrorBoundary>
+        <Router>
+          <div className="min-h-screen bg-eco-dark font-sans text-gray-100">
+            <AnimatedRoutes />
+          </div>
+        </Router>
+      </ErrorBoundary>
     </AuthProvider>
   );
 }
